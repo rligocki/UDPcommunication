@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
@@ -17,7 +18,7 @@ public class MyService extends Service {
 	public MyService() {
 	}
     static String UDP_BROADCAST = "UDPBroadcast";
-
+    public Bundle extras;
     //Boolean shouldListenForUDPBroadcast = false;
     DatagramSocket socket;
 
@@ -29,7 +30,7 @@ public class MyService extends Service {
         }
         //socket.setSoTimeout(1000);
         DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
-        Log.e("UDP", "Waiting for UDP broadcast");
+        Log.e("UDP", "Waiting for UDP broadcast on port" + port.toString());
         socket.receive(packet);
 
         String senderIP = packet.getAddress().getHostAddress();
@@ -71,7 +72,7 @@ public class MyService extends Service {
         UDPBroadcastThread = new Thread(new Runnable() {
             public void run() {
                 try {
-                    Integer port = 3000;
+                    Integer port = (Integer) extras.get("Port");
                     while (shouldRestartSocketListen) {
                         listenAndWaitAndThrowIntent( port);
                     }
@@ -115,7 +116,9 @@ public class MyService extends Service {
 
         shouldRestartSocketListen = true;
         startListenForUDPBroadcast();
+        extras = intent.getExtras();
         Log.i("UDP", "Service started");
+
 
     }
  
